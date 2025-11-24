@@ -1,0 +1,97 @@
+@startuml
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+' Интерфейсы
+package "org.example.interfaces" {
+    interface UserType
+    interface Comparator
+    interface DoWith
+    interface TestIt
+}
+
+' Основные компоненты
+package "org.example.impl" {
+    class DoublyLinkedList
+    class Node
+    class UserFactory
+}
+
+' Типы данных
+package "org.example.types" {
+    class IntegerType
+    class IntegerComparator
+    class StringType
+    class StringComparator
+    class Point2DType
+    class Point2DComparator
+    class Point2D
+}
+
+' Пользовательский интерфейс
+package "org.example.javaFX" {
+    class Main
+    class ListController
+}
+
+' Отношения наследования
+UserType <|.. IntegerType
+UserType <|.. StringType
+UserType <|.. Point2DType
+
+Comparator <|.. IntegerComparator
+Comparator <|.. StringComparator
+Comparator <|.. Point2DComparator
+
+Main --|> javafx.application.Application
+ListController ..|> javafx.fxml.Initializable
+
+' Отношения композиции
+DoublyLinkedList *-- Node : содержит
+IntegerType *-- IntegerComparator : создает
+StringType *-- StringComparator : создает
+Point2DType *-- Point2DComparator : создает
+Point2DType *-- Point2D : содержит
+
+' Отношения зависимости
+DoublyLinkedList ..> Comparator : использует
+DoublyLinkedList ..> DoWith : использует
+DoublyLinkedList ..> TestIt : использует
+UserType ..> Comparator : возвращает
+ListController --> DoublyLinkedList : использует
+ListController --> UserFactory : использует
+ListController ..> UserType : использует
+UserFactory ..> UserType : создает
+UserFactory ..> IntegerType : создает
+UserFactory ..> StringType : создает
+UserFactory ..> Point2DType : создает
+
+' Примечания
+note right of DoublyLinkedList
+  Реализация двусвязного списка
+  Алгоритм сортировки слиянием
+  Временная сложность O(n log n)
+end note
+
+note right of UserFactory
+  Паттерн Фабрика
+  Создание экземпляров UserType
+end note
+
+note right of Point2D
+  Kotlin data class
+  Вычисление расстояния
+end note
+
+note right of DoWith
+  Kotlin fun interface
+  Функциональный интерфейс
+end note
+
+note right of TestIt
+  Kotlin fun interface
+  Функциональный интерфейс
+end note
+
+@enduml
