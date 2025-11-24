@@ -92,8 +92,9 @@ class DoublyLinkedList {
                 repeat(index) {
                     current = current?.next
                 }
-                current?.prev?.next = current.next
-                current?.next?.prev = current.prev
+                val target = current ?: return
+                target.prev?.next = target.next
+                target.next?.prev = target.prev
             }
         }
         size--
