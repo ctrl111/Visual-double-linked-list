@@ -40,6 +40,23 @@ class DoublyLinkedListStructuralTest {
     }
 
     @Test
+    fun `sort keeps already sorted list unchanged`() {
+        val list = buildList(1, 2, 3, 4, 5)
+
+        list.sort(comparator)
+
+        assertEquals(listOf(1, 2, 3, 4, 5), list.asIntList())
+    }
+
+    @Test
+    fun `sort correctly handles reverse sorted list`() {
+        val list = buildList(5, 4, 3, 2, 1)
+
+        list.sort(comparator)
+
+        assertEquals(listOf(1, 2, 3, 4, 5), list.asIntList())
+    }
+
     private fun buildList(vararg values: Int): DoublyLinkedList =
         DoublyLinkedList().apply { values.forEach { add(it) } }
 
