@@ -10,16 +10,20 @@ class DoublyLinkedListStructuralTest {
     private val comparator: Comparator = IntegerType().getTypeComparator()
 
     @Test
+    // size == 0
     fun `sort is a no-op for an empty list`() {
         val list = DoublyLinkedList()
 
+
         list.sort(comparator)
+
 
         assertEquals(0, list.size())
         assertEquals(emptyList<Int>(), list.asIntList())
     }
 
     @Test
+    // size == 1
     fun `sort is a no-op for a single element list`() {
         val list = buildList(42)
 
@@ -40,6 +44,7 @@ class DoublyLinkedListStructuralTest {
     }
 
     @Test
+    //
     fun `sort keeps already sorted list unchanged`() {
         val list = buildList(1, 2, 3, 4, 5)
 

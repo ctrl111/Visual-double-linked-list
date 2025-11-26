@@ -167,18 +167,31 @@ class DoublyLinkedList {
         var r = right
 
         while (l != null && r != null) {
+
+            // правильная версия:
             if (comparator.compare(l.data, r.data) <= 0) {
+
+                // Версия с дефектом
+//            if (comparator.compare(l.data, r.data) >= 0) {
                 current.next = l
                 l.prev = current
                 l = l.next
             } else {
+
+                // правильная версия:
                 current.next = r
                 r.prev = current
                 r = r.next
+
+                // Тестирование полупрозрачного ящика ：Внести дефекты
+//                current.next = r
+//                // r.prev = current
+//                r = r.next
             }
             current = current.next!!
         }
 
+        // правильная версия:
         when {
             l != null -> {
                 current.next = l
@@ -189,6 +202,15 @@ class DoublyLinkedList {
                 r.prev = current
             }
         }
+
+        // Версия с дефектом
+//        when {
+//            l != null -> {
+//                current.next = l
+//                l.prev = current
+//            }
+//            // r != null -> { ... }
+//        }
 
         val result = dummy.next
         result?.prev = null

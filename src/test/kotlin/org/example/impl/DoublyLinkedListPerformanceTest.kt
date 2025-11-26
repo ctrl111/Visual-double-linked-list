@@ -15,40 +15,60 @@ class DoublyLinkedListPerformanceTest {
 
     @Test
     fun `performance profile across growing datasets`() {
-        val sizes = listOf(100, 1_000, 5_000, 10_000)
+        val sizes = listOf(5_000, 2_0000, 4_0000, 8_0000)
         val samples = sizes.map { size ->
             val data = IntArray(size) { Random.nextInt(0, size) }
-            val list = DoublyLinkedList().apply { data.forEach { add(it) } }
 
+            // 多次重复排序以获得“脏时间”（包含系统抖动的实际耗时）
+            val repeats = 5
+            val nanosPerRun = (1..repeats).map { runIndex ->
+                val listForRun = DoublyLinkedList().apply { data.forEach { add(it) } }
+                val nanos = measureNanoTime { listForRun.sort(comparator) }
+                assertEquals(
+                    data.sorted().toList(),
+                    listForRun.asIntList(),
+                    "sorted content mismatch for size=$size run=$runIndex"
+                )
+                nanos
+            }
+            val avgMillis = (nanosPerRun.average() / 1_000_000.0).toLong()
+            val maxMillis = (nanosPerRun.maxOrNull() ?: 0L) / 1_000_000
+
+            // 单独构造一份用于测量排序前后堆内存占用的列表
+            val memoryList = DoublyLinkedList().apply { data.forEach { add(it) } }
             val runtime = Runtime.getRuntime()
             runtime.gc()
             val memoryBefore = runtime.totalMemory() - runtime.freeMemory()
 
-            val nanos = measureNanoTime { list.sort(comparator) }
+            measureNanoTime { memoryList.sort(comparator) } // 这一次主要用于触发内存分配
 
             val memoryAfter = runtime.totalMemory() - runtime.freeMemory()
             val memoryDelta = max(0L, memoryAfter - memoryBefore)
 
-            assertEquals(data.sorted().toList(), list.asIntList(), "sorted content mismatch for size=$size")
-
             PerfSample(
                 size = size,
-                millis = nanos / 1_000_000,
+                avgMillis = avgMillis,
+                maxMillis = maxMillis,
                 memoryBytes = memoryDelta,
-                nodeCount = list.size()
+                nodeCount = memoryList.size()
             )
         }
 
         samples.forEach {
-            println("size=${it.size}, time=${it.millis} ms, memory=${it.memoryBytes} bytes, nodes=${it.nodeCount}")
+            println(
+                "size=${it.size}, avgTime=${it.avgMillis} ms, " +
+                    "maxTime=${it.maxMillis} ms, memory=${it.memoryBytes} bytes, nodes=${it.nodeCount}"
+            )
         }
 
-        assertTrue(samples.zipWithNext().all { (prev, next) -> next.millis >= prev.millis })
+        // 简单检查平均时间随规模近似单调不减
+        assertTrue(samples.zipWithNext().all { (prev, next) -> next.avgMillis >= prev.avgMillis })
     }
 
     private data class PerfSample(
         val size: Int,
-        val millis: Long,
+        val avgMillis: Long,
+        val maxMillis: Long,
         val memoryBytes: Long,
         val nodeCount: Int
     )
